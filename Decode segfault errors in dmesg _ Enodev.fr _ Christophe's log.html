@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)http://www.enodev.fr/posts/decode-segfault-errors-in-dmesg.html -->
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# " lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<!--<base href="http://www.enodev.fr/posts/decode-segfault-errors-in-dmesg.html">--><base href=".">
+<meta name="description" content="How to decode a segfault error displayed in  dmesg and use to debug your program">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decode segfault errors in dmesg | Enodev.fr / Christophe's log</title>
+<link href="./Decode segfault errors in dmesg _ Enodev.fr _ Christophe's log_files/all-nocdn.css" rel="stylesheet" type="text/css">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="http://www.enodev.fr/rss.xml">
+<link rel="canonical" href="./Decode segfault errors in dmesg _ Enodev.fr _ Christophe's log_files/Decode segfault errors in dmesg _ Enodev.fr _ Christophe's log.html">
+<link rel="icon" href="http://www.enodev.fr/favicon.ico" sizes="16x16">
+<link rel="icon" href="http://www.enodev.fr/apple-touch-icon.png" sizes="128x128">
+<!--[if lt IE 9]><script src="../assets/js/html5.js"></script><![endif]--><link rel="stylesheet" href="./Decode segfault errors in dmesg _ Enodev.fr _ Christophe's log_files/font-awesome.min.css">
+<meta name="description" itemprop="description" content="How to decode a segfault error displayed in  dmesg and use to debug your program">
+<meta name="author" content="Christophe Vu-Brugier">
+<link rel="prev" href="http://www.enodev.fr/posts/install-an-isns-server-on-openindiana.html" title="Install an iSNS server on OpenIndiana" type="text/html">
+<link rel="next" href="http://www.enodev.fr/posts/compare-binary-files.html" title="Compare binary files" type="text/html">
+<meta property="og:site_name" content="Enodev.fr / Christophe&#39;s log">
+<meta property="og:title" content="Decode segfault errors in dmesg">
+<meta property="og:url" content="http://www.enodev.fr/posts/decode-segfault-errors-in-dmesg.html">
+<meta property="og:description" content="How to decode a segfault error displayed in  dmesg and use to debug your program">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2014-06-14T20:00:00+02:00">
+<meta property="article:tag" content="Debugging">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Programming">
+<meta property="article:tag" content="x86">
+<style type="text/css"></style></head>
+<body>
+<a href="http://www.enodev.fr/posts/decode-segfault-errors-in-dmesg.html#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-inverse navbar-static-top"><div class="container">
+<!-- This keeps the margins nice -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://www.enodev.fr/">
+
+                <span id="blog-title">Enodev.fr / Christophe's log</span>
+            </a>
+        </div>
+<!-- /.navbar-header -->
+        <div class="collapse navbar-collapse" id="bs-navbar" aria-expanded="false">
+            <ul class="nav navbar-nav">
+<li>
+<a href="http://www.enodev.fr/stories/about.html">About</a>
+                </li>
+<li>
+<a href="http://www.enodev.fr/categories/cat_software.html">Software</a>
+                </li>
+<li>
+<a href="https://github.com/cvubrugier"><i class="fa fa-github fa-lg"></i></a>
+                </li>
+<li>
+<a href="http://stackoverflow.com/users/93414/christophe-vu-brugier"><i class="fa fa-stack-overflow fa-lg"></i></a>
+                </li>
+<li>
+<a href="http://www.linkedin.com/pub/christophe-vu-brugier/19/4b3/a03"><i class="fa fa-linkedin fa-lg"></i></a>
+                </li>
+<li>
+<a href="http://www.enodev.fr/categories/index.html"><i class="fa fa-tag fa-lg"></i></a>
+                </li>
+<li>
+<a href="http://www.enodev.fr/rss.xml"><i class="fa fa-rss fa-lg"></i></a>
+
+                
+            </li>
+</ul>
+<ul class="nav navbar-nav navbar-right"></ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        <div class="row">
+            
+            
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="http://www.enodev.fr/posts/decode-segfault-errors-in-dmesg.html#" class="u-url">Decode segfault errors in dmesg</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn">Christophe Vu-Brugier</span></p>
+            <p class="dateline"><a href="http://www.enodev.fr/posts/decode-segfault-errors-in-dmesg.html#" rel="bookmark"><time class="published dt-published" datetime="2014-06-14T20:00:00+02:00" itemprop="datePublished" title="2014-06-14">2014-06-14</time></a></p>
+            
+
+                <meta name="description" itemprop="description" content="How to decode a segfault error displayed in  dmesg and use to debug your program">
+</div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div>
+<p>You are writing a C program. Time has come to run it. You are pretty
+confident that it will run at once.</p>
+<pre class="code literal-block"><span class="gp">$</span> ./foo
+<span class="go">Segmentation fault</span>
+</pre>
+
+
+<p>The machine hardly reminds you that you were over-confident. But
+before rushing to re-compile your program with debugging symbols or
+adding <code>printf()</code> calls here and there, have a look at the output of the
+Linux kernel:</p>
+<pre class="code literal-block"><span class="gp">$</span> dmesg
+<span class="go">foo[1234]: segfault at 2a ip 0000000000400511 sp 00007fffe00a3260 error 4 in foo[400000+1000]</span>
+</pre>
+
+
+<p>These are some hints in dmesg output:</p>
+<ul>
+<li>
+<code>foo</code> is the <em>executable name</em>
+</li>
+<li>
+<code>1234</code> is the <em>process ID</em>
+</li>
+<li>
+<code>2a</code> is the <em>faulty address</em> in hexadecimal</li>
+<li>the value after <code>ip</code> is the <em>instruction pointer</em>
+</li>
+<li>the value after <code>sp</code> is the <em>stack pointer</em>
+</li>
+<li>
+<code>error 4</code> is an <em>error code</em>
+</li>
+<li>the string at the end is the <em>name of the virtual memory area</em> (VMA)</li>
+</ul>
+<p>The error code is a combination of several error bits defined in
+<a href="http://lxr.free-electrons.com/source/arch/x86/mm/fault.c?v=3.15#L27">fault.c</a>
+in the Linux kernel:</p>
+<pre class="code literal-block"><span class="cm">/*</span>
+<span class="cm"> * Page fault error code bits:</span>
+<span class="cm"> *</span>
+<span class="cm"> *   bit 0 ==    0: no page found       1: protection fault</span>
+<span class="cm"> *   bit 1 ==    0: read access         1: write access</span>
+<span class="cm"> *   bit 2 ==    0: kernel-mode access  1: user-mode access</span>
+<span class="cm"> *   bit 3 ==                           1: use of reserved bit detected</span>
+<span class="cm"> *   bit 4 ==                           1: fault was an instruction fetch</span>
+<span class="cm"> */</span>
+<span class="k">enum</span> <span class="n">x86_pf_error_code</span> <span class="p">{</span>
+    <span class="n">PF_PROT</span>         <span class="o">=</span>               <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">PF_WRITE</span>        <span class="o">=</span>               <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">PF_USER</span>         <span class="o">=</span>               <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">PF_RSVD</span>         <span class="o">=</span>               <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">PF_INSTR</span>        <span class="o">=</span>               <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">};</span>
+</pre>
+
+
+<p>Since you are executing a user-mode program, <code>PF_USER</code> is set and the
+error code is at least 4. If the invalid memory access is a write,
+then <code>PF_WRITE</code> is set. Thus:</p>
+<ul>
+<li>if the error code is 4, then the faulty memory access is a read from
+  userland</li>
+<li>if the error code is 6, then the faulty memory access is a write
+  from userland</li>
+</ul>
+<p>Moreover, the <em>faulty memory address</em> in <code>dmesg</code> can help you identify
+the bug. For instance, if the memory address is 0, the root cause is
+probably a NULL pointer dereference.</p>
+<p>The name of the VMA may give you an indication of the location of the
+error:</p>
+<pre class="code literal-block"><span class="cp">#include &lt;stdlib.h&gt;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+        <span class="n">free</span><span class="p">((</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="mi">42</span><span class="p">);</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre>
+
+
+<p>When executed, the program above triggers a segfault and the VMA name
+is the libc. So we can imagine that a libc function was called with an
+invalid pointer.</p>
+<pre class="code literal-block"><span class="go">bar[1234]: segfault at 22 ip 7fb171207824 sp 7fff839b57d8 error 4 in libc-2.19.so[7fb17118b000+19f000]</span>
+</pre>
+
+
+<p>The fault handler is architecture dependent, so you will not observe
+the same messages in <code>dmesg</code> with other architectures than x86. For
+instance, on ARM no message is displayed unless the Linux kernel has
+been built with <code>CONFIG_DEBUG_USER</code>.</p>
+<div class="caption">
+  <img src="./Decode segfault errors in dmesg _ Enodev.fr _ Christophe's log_files/poutres-fondation-louis-vuitton.thumbnail.jpg" class="img-responsive img-rounded center-block"><p>A <s>64-bit</s> 64-beam architecture<br><small>Fondation Louis Vuitton</small></p>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="http://www.enodev.fr/categories/debugging.html" rel="tag">Debugging</a></li>
+            <li><a class="tag p-category" href="http://www.enodev.fr/categories/linux.html" rel="tag">Linux</a></li>
+            <li><a class="tag p-category" href="http://www.enodev.fr/categories/programming.html" rel="tag">Programming</a></li>
+            <li><a class="tag p-category" href="http://www.enodev.fr/categories/x86.html" rel="tag">x86</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="http://www.enodev.fr/posts/install-an-isns-server-on-openindiana.html" rel="prev" title="Install an iSNS server on OpenIndiana">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="http://www.enodev.fr/posts/compare-binary-files.html" rel="next" title="Compare binary files">Next post</a>
+            </li>
+        </ul></nav></aside></article>
+</div>
+        <!--End of body content-->
+
+        <footer id="footer">
+            Contents © 2015         <a href="mailto:cvubrugier@yahoo.fr">Christophe Vu-Brugier</a> - Powered by         <a href="https://getnikola.com/" rel="nofollow">Nikola</a>         
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+<img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="./Decode segfault errors in dmesg _ Enodev.fr _ Christophe's log_files/88x31.png"></a>
+            
+        </footer>
+</div>
+</div>
+
+
+            <script src="./Decode segfault errors in dmesg _ Enodev.fr _ Christophe's log_files/all-nocdn.js"></script><script>$('a.image-reference:not(.islink) img:not(.islink)').parent().colorbox({rel:"gal",maxWidth:"100%",maxHeight:"100%",scalePhotos:true});</script><!-- fancy dates --><script>
+    moment.locale("");
+    fancydates(0, "YYYY-MM-DD HH:mm");
+    </script><!-- end fancy dates -->
+
+
+<div id="cboxOverlay" style="display: none;"></div><div id="colorbox" class="" role="dialog" tabindex="-1" style="display: none;"><div id="cboxWrapper"><div><div id="cboxTopLeft" style="float: left;"></div><div id="cboxTopCenter" style="float: left;"></div><div id="cboxTopRight" style="float: left;"></div></div><div style="clear: left;"><div id="cboxMiddleLeft" style="float: left;"></div><div id="cboxContent" style="float: left;"><div id="cboxTitle" style="float: left;"></div><div id="cboxCurrent" style="float: left;"></div><button type="button" id="cboxPrevious"></button><button type="button" id="cboxNext"></button><button id="cboxSlideshow"></button><div id="cboxLoadingOverlay" style="float: left;"></div><div id="cboxLoadingGraphic" style="float: left;"></div></div><div id="cboxMiddleRight" style="float: left;"></div></div><div style="clear: left;"><div id="cboxBottomLeft" style="float: left;"></div><div id="cboxBottomCenter" style="float: left;"></div><div id="cboxBottomRight" style="float: left;"></div></div></div><div style="position: absolute; width: 9999px; visibility: hidden; display: none; max-width: none;"></div></div></body></html>
