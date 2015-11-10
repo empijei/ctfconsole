@@ -1,3 +1,4 @@
+#!/bin/python2.7
 import binascii
 #formats: hex, ascii, bin, decimal
 
@@ -116,7 +117,7 @@ def dec2bin(strin):
     return out
     return bin(int(strin))
 
-
+"""
 test="ABCD"
 print(ascii2hex(test))
 print(ascii2bin(test))
@@ -150,4 +151,4 @@ print()
 strin="065066074075"
 print(dec2ascii(strin))
 print(dec2hex(strin))
-print(dec2bin(strin))
+print(dec2bin(strin))"""
