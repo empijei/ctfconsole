@@ -16,7 +16,6 @@ From the linux sources:
 
 def decode_error(errorcode):
     errorcode=str(bin(errorcode))[2:].rjust(5,"0")
-    print(errorcode[4])
     out="Error:" + errorcode + "\n"
     out+=("Protection fault" if errorcode[4]=="1" else "No page found")
     out+="\n"
