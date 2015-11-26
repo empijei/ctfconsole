@@ -9,6 +9,8 @@ analyze(){
 	echo $FILE >> fileinfo.log
 	echo \nBinWalk:
 	binwalk "$1" | tee -a fileinfo.log
+	echo \nTrid:
+	trid "$1" | tee -a fileinfo.log
 	if [[ $FILE == *"ELF"* ]]
 	then
 		echo \nCheckSec:
