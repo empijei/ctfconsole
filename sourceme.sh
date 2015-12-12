@@ -25,19 +25,28 @@ analyze(){
 	fi
 
 }
-#TODO
-ctf(){
 
-}
-
-#TODO improve creating a filder in the root of a ctf
-challenge(){
-	mkdir "$@"
-	cd "$@"
+errordecode(){
+python -c '
+'"errorcode=$1"'
+errorcode=str(bin(errorcode))[2:].rjust(5,"0")
+out="Error:" + errorcode + "\n"
+out+=("Protection fault" if errorcode[4]=="1" else "No page found")
+out+="\n"
+out+=("Write access" if errorcode[3]=="1" else "Read access")
+out+="\n"
+out+=("User-mode access" if errorcode[2]=="1" else "Kernel-mode access")
+out+="\n"
+if errorcode[1] =="1":
+	out+="Use of reserved bit detected\n"
+if errorcode[0] =="1":
+	out+="Fault during instruction fetch\n"
+print(out)
+'  
 }
 
 formats(){
-	python -c '
+python -c '
 import binascii
 import code
 
@@ -162,6 +171,28 @@ print("Supported formats: hex, ascii, bin, decimal")
 code.interact("To convert between values, i.e hex and bin type: hex2bin(\"9F\")", None,locals())
 '}
 
+hex2dec(){
+	echo "obase=10;ibase=16;$1" | bc
+}
+
+hex2ascii(){
+	#TODO warn if odd length
+	printf $(echo $1 | sed -r 's/(..)/\\x\1/g')
+}
+
+hex2bin(){
+	echo "obase=2;ibase=16;$1" | bc
+}
+
+hex2all(){
+	echo Decimal:
+	hex2dec $1
+	echo Binary:
+	hex2bin $1
+	echo ASCII:
+	hex2ascii $1
+}
+
 
 
 #TODO
@@ -173,3 +204,13 @@ help(){
 	#
 }
 
+#TODO
+ctf(){
+
+}
+
+#TODO improve creating a filder in the root of a ctf
+challenge(){
+	mkdir "$@"
+	cd "$@"
+}
