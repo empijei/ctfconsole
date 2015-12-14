@@ -1,9 +1,3 @@
-strformat
+strformat, support '0x', detect errors
 easy folder switch
-pattern create/grep
-error code recognition
-binwalk
-ls -la
 some minor gdb / bash helps
-hex - bin - dec conversion
-ascii stuff
