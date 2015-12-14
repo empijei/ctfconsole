@@ -1,2 +1,3 @@
 bash:
-	bash -c "cat ./bash/* >> ./sourceme"
+	rm ./sourceme
+	bash -c "cat ./bash/*.sh >> ./sourceme"

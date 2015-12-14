@@ -1,0 +1,28 @@
+source ../sourceme
+hex2all '41
+42
+43'
+
+hex2all '41 42 43'
+
+hex2all '414243'
+
+bin2all '1100001
+1100010
+1100011'
+
+bin2all '1100001 1100010 1100011'
+
+dec2all '65 66 67'
+
+dec2all '65
+66
+67'
+
+ascii2all abc
+
+ascii2all 'a b c'
+
+ascii2all 'a
+b
+c'

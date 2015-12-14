@@ -1,182 +1,3 @@
-errordecode(){
-	BITMASK=$(printf "%05d" "$(echo "obase=2;$1" | bc)")
-	echo $BITMASK
-	echo $BITMASK | grep -e '....1' > /dev/null && echo "Protection fault" || echo "No page found"
-	echo $BITMASK | grep -e '...1.' > /dev/null && echo "Write access" || echo "Read Access"
-	echo $BITMASK | grep -e '..1..' > /dev/null && echo "User mode access" || echo "Kernel mode access"
-	echo $BITMASK | grep -e '.1...' > /dev/null && echo "Use of reserved bit detected"
-	echo $BITMASK | grep -e '1....' > /dev/null && echo "Fault during instruction fetch"
-}
-
-dmesg-readable(){
-	MESSAGE=$(dmesg | tail -1)
-	echo $MESSAGE
-	echo
-	echo $MESSAGE | grep "error" > /dev/null &&
-	ERRORCODE=$(echo $MESSAGE | cut -d' ' -f 11) && 
-	errordecode $ERRORCODE
-	echo
-	echo $MESSAGE | grep "segfault" > /dev/null &&
-	IP=$(echo $MESSAGE | cut -d' ' -f 5) &&
-	CYCLIC=$(cyclic -l "0x$IP" 2>&1) 
-	echo $CYCLIC  | grep -e 'CRITICAL' > /dev/null ||
-	echo "Cyclic at: $CYCLIC"
-}
-#HEX
-hex2dec(){     
-	HEX=$(echo $1 | sed 's/0x//g')
-    echo "obase=10;ibase=16;$HEX" | bc    
-}                  
-                   
-hex2ascii(){              
-	HEX=$(echo $1 | sed 's/0x//g')
-	#This is to even the odds with a leading 0
-	echo $HEX | grep '^\(..\)*.$' > /dev/null && HEX="0$HEX" || HEX="$HEX"
-    printf $(echo $HEX | sed -r 's/(..)/\\x\1/g')    
-}                         
-                          
-hex2bin(){                
-	HEX=$(echo $1 | sed 's/0x//g')
-    echo "obase=2;ibase=16;$HEX" | bc     
-}                                      
-                          
-hex2all(){                
-    echo Dec:         
-    hex2dec $1            
-    echo Bin:          
-    hex2bin $1                                          
-    echo ASCII:                                         
-    hex2ascii $1                                        
-} 
-#DEC
-dec2hex(){
-	printf '%x' "$1"
-}
-dec2bin(){
-	echo "obase=2;$1" | bc
-}
-dec2ascii(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-dec2all(){
-	echo Hex:
-	dec2hex $1
-	echo Bin:
-	dec2bin $1
-	echo ASCII:
-	dec2ascii $1
-}
-
-#BIN
-bin2hex(){
-	echo "obase=16;ibase=2;$1" | bc
-}
-bin2dec(){
-	echo "obase=10;ibase=2;$1" | bc
-}
-bin2ascii(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-bin2all(){
-	echo Hex:
-    bin2hex $1
-	echo Dec:
-	bin2dec $1
-	echo ASCII:
-	bin2ascii $1
-}
-
-#ASCII
-ascii2hex(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-ascii2bin(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-ascii2dec(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-ascii2all(){
-	echo Hex:
-	ascii2hex $1
-	echo Bin:
-	ascii2bin $1
-	echo ASCII:
-	ascii2dec $1
-}
-alias ls="ls -la"
-
-analyze(){
-	FILE=`file "$1"`
-	echo File:
-	echo $FILE
-	echo "$1" > fileinfo.log
-	echo \n--BINWALK-- >> fileinfo.log
-	echo $FILE >> fileinfo.log
-	echo \nBinWalk:
-	binwalk "$1" | tee -a fileinfo.log
-	echo \nTrid:
-	trid "$1" | tee -a fileinfo.log
-	if [[ $FILE == *"ELF"* ]]
-	then
-		echo \nCheckSec:
-		echo \n--CHECKSEC-- >> fileinfo.log
-		checksec --file "$1" | tee -a fileinfo.log
-		echo \n--STRINGS-- >> fileinfo.log
-		strings "$1" >> fileinfo.log
-	else
-		echo \n--STRINGS-- >> fileinfo.log
-		echo \nStrings:
-		strings "$1"
-	fi
-
-}
-
-#TODO
-help(){
-	#format conversion
-	#cyclic from pwn
-	#ropper
-	#
-	#
-}
-
-#TODO
-ctf(){
-
-}
-
-#TODO improve creating a folder in the root of a ctf
-challenge(){
-	mkdir "$@"
-	cd "$@"
-}
-
-urlencode() {
-    # urlencode <string>
-
-    local length="${#1}"
-    for (( i = 0; i < length; i++ )); do
-        local c="${1:$i:1}"
-        case $c in
-            [a-zA-Z0-9.~_-]) printf "$c" ;;
-            *) printf '%s' "$c" | xxd -p -c1 |
-                   while read c; do printf '%%%s' "$c"; done ;;
-        esac
-    done
-}
-
-urldecode() {
-    # urldecode <string>
-
-    local url_encoded="${1//+/ }"
-    printf '%b' "${url_encoded//%/\\x}"
-}
 export CTFHELP=$CTFHELP"
 errordecode <value> will print a human readable interpretation of a given dmesg
 					error.
@@ -237,329 +58,119 @@ informat2outformat <string> will convert from the input format to the output one
 					depends on xxd, grep, sed, bc"
 #HEX
 hex2dec(){     
-	local HEX=$(echo $1 | sed 's/0x//g')
-    echo "obase=10;ibase=16;$HEX" | bc    
+	for var in `echo "$@"`
+	do
+		local HEX=$(echo $var | sed 's/0x//g')
+		echo "obase=10;ibase=16;$HEX" | bc    
+	done
 }                  
                    
 hex2ascii(){              
-	local HEX=$(echo $1 | sed 's/0x//g')
-	#This is to even the odds with a leading 0
-	echo $HEX | grep '^\(..\)*.$' > /dev/null && HEX="0$HEX" || HEX="$HEX"
-    printf $(echo $HEX | sed -r 's/(..)/\\x\1/g')    
+	for var in `echo "$@"`
+	do
+		local HEX=$(echo $var | sed 's/0x//g')
+		echo $HEX | grep '^\(..\)*.$' > /dev/null && HEX="0$HEX" || HEX="$HEX"
+		printf $(echo $HEX | sed -r 's/(..)/\\x\1/g')" " 
+	done
 }                         
-                          
+
 hex2bin(){                
-	local HEX=$(echo $1 | sed 's/0x//g')
-    echo "obase=2;ibase=16;$HEX" | bc     
+	for var in `echo "$@"`
+	do
+		local HEX=$(echo $var | sed 's/0x//g')
+		echo "obase=2;ibase=16;$HEX" | bc     
+	done
 }                                      
-                          
+
 hex2all(){                
-    echo Dec:         
-    hex2dec $1            
-    echo Bin:          
-    hex2bin $1                                          
-    echo ASCII:                                         
-    hex2ascii $1                                        
+	echo Dec:         
+	hex2dec $@            
+	echo Bin:          
+	hex2bin $@                                          
+	echo ASCII:                                         
+	hex2ascii $@                                        
 } 
 #DEC
 dec2hex(){
-	printf '%x' "$1"
+	for var in `echo "$@"`
+	do
+		printf '%x\n' "$var"
+	done
 }
 dec2bin(){
-	echo "obase=2;$1" | bc
+	for var in `echo "$@"`
+	do
+		echo "obase=2;$var" | bc
+	done
 }
 dec2ascii(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	for var in `echo "$@"`
+	do
+		hex2ascii $(dec2hex $var)
+	done
 }
 dec2all(){
 	echo Hex:
-	dec2hex $1
+	dec2hex $@
 	echo Bin:
-	dec2bin $1
+	dec2bin $@
 	echo ASCII:
-	dec2ascii $1
+	dec2ascii $@
 }
 
 #BIN
 bin2hex(){
-	echo "obase=16;ibase=2;$1" | bc
+	for var in `echo "$@"`
+	do
+		echo "obase=16;ibase=2;$var" | bc
+	done
 }
 bin2dec(){
-	echo "obase=10;ibase=2;$1" | bc
+	for var in `echo "$@"`
+	do
+		echo "obase=10;ibase=2;$var" | bc
+	done
 }
 bin2ascii(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	for var in `echo "$@"`
+	do
+		hex2ascii "$(bin2hex $var)"
+	done
 }
 bin2all(){
 	echo Hex:
-    bin2hex $1
+	bin2hex $@
 	echo Dec:
-	bin2dec $1
+	bin2dec $@
 	echo ASCII:
-	bin2ascii $1
+	bin2ascii $@
 }
 
 #ASCII
 ascii2hex(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	for var in "$@"
+	do
+		local length="${#var}"
+		for (( i = 0; i < length; i++ ))
+		do
+			local c="${var:$i:1}"
+			echo -n "$c" | xxd | cut -d" " -f 2
+		done
+	done
 }
 ascii2bin(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	hex2bin "$(ascii2hex $@)"
 }
 ascii2dec(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	hex2dec "$(ascii2hex $@)"
 }
 ascii2all(){
 	echo Hex:
-	ascii2hex $1
+	ascii2hex $@
 	echo Bin:
-	ascii2bin $1
-	echo ASCII:
-	ascii2dec $1
-}
-
-alias la="ls -la"
-
-export CTFHELP=$CTFHELP"
-analyze <file> 		will print useful informations about the given file and will
-					also create a fileinfo.log with the same informations.
-
-					commands called:
-						file
-						binwalk
-						trid
-						extract
-						on ELF files:
-							checksec
-							strings (this will only be written to the log)
-						on the other files:
-							strings
-
-					depends on the commands above"
-
-analyze(){
-	FILE=`file "$1"`
-	echo File:
-	echo $FILE
-	echo "$1" > fileinfo.log
-	echo $FILE >> fileinfo.log
-	echo \n--BINWALK-- >> fileinfo.log
-	echo \nBinWalk:
-	binwalk "$1" | tee -a fileinfo.log
-	echo \n--TRID-- >> fileinfo.log
-	echo \nTrid:
-	trid "$1" | tee -a fileinfo.log
-	echo \n--EXTRACT-- >> fileinfo.log
-	echo \nExtract:
-	extract "$1" | tee -a fileinfo.log
-	if [[ $FILE == *"ELF"* ]]
-	then
-		echo \nCheckSec:
-		echo \n--CHECKSEC-- >> fileinfo.log
-		checksec --file "$1" | tee -a fileinfo.log
-		echo \n--STRINGS-- >> fileinfo.log
-		strings "$1" >> fileinfo.log
-	else
-		echo \n--STRINGS-- >> fileinfo.log
-		echo \nStrings:
-		strings "$1" | tee -a fileinfo.log
-	fi
-
-}
-
-#TODO
-help(){
-	#format conversion
-	#cyclic from pwn
-	#ropper
-	#
-	#
-	echo $CTFHELP
-}
-
-#TODO
-ctf(){
-
-}
-
-#TODO improve creating a folder in the root of a ctf
-challenge(){
-	mkdir "$@"
-	cd "$@"
-}
-#WEB ENCODER
-export CTFHELP=$CTFHELP"
-urlencode <string> will print the string encoded as url.
-
-					depends on xxd"
-urlencode() {
-    local length="${#1}"
-    for (( i = 0; i < length; i++ )); do
-        local c="${1:$i:1}"
-        case $c in
-            [a-zA-Z0-9.~_-]) printf "$c" ;;
-            *) printf '%s' "$c" | xxd -p -c1 |
-                   while read c; do printf '%%%s' "$c"; done ;;
-        esac
-    done
-}
-
-export CTFHELP=$CTFHELP"
-urlencode <string> will decode a string encoded as url."
-urldecode() {
-    local url_encoded="${1//+/ }"
-    printf '%b' "${url_encoded//"%"/\\x}"
-}
-
-export CTFHELP=$CTFHELP"
-errordecode <value> will print a human readable interpretation of a given dmesg
-					error.
-
-					example: errordecode 14 
-								Error:01110
-								No page found
-								Write access
-								User-mode access
-								Use of reserved bit detected
-
-
-					depends on xxd, bc, grep"
-
-errordecode(){
-	BITMASK=$(printf "%05d" "$(echo "obase=2;$1" | bc)")
-	echo $BITMASK
-	echo $BITMASK | grep -e '....1' > /dev/null && echo "Protection fault" || echo "No page found"
-	echo $BITMASK | grep -e '...1.' > /dev/null && echo "Write access" || echo "Read Access"
-	echo $BITMASK | grep -e '..1..' > /dev/null && echo "User mode access" || echo "Kernel mode access"
-	echo $BITMASK | grep -e '.1...' > /dev/null && echo "Use of reserved bit detected"
-	echo $BITMASK | grep -e '1....' > /dev/null && echo "Fault during instruction fetch"
-}
-
-export CTFHELP=$CTFHELP"
-dmesg-readable 		will call dmesg, tail the last line and decode the error.
-					if pwntools are installed it will try to look up the IP 
-					with the 'cyclic -l' command.
-	
- 					depends on xxd, grep, [pwntools]"
-
-dmesg-readable(){
-	MESSAGE=$(dmesg | tail -1)
-	echo $MESSAGE
-	echo
-	echo $MESSAGE | grep "error" > /dev/null &&
-	ERRORCODE=$(echo $MESSAGE | cut -d' ' -f 11) && 
-	errordecode $ERRORCODE
-	echo
-	echo $MESSAGE | grep "segfault" > /dev/null &&
-	IP=$(echo $MESSAGE | cut -d' ' -f 5) &&
-	CYCLIC=$(cyclic -l "0x$IP" 2>&1) 
-	echo $CYCLIC  | grep -e 'CRITICAL' > /dev/null ||
-	echo "Cyclic at: $CYCLIC"
-}
-#FORMATS CONVERTER
-export CTFHELP=$CTFHELP"
-formats converter:
-informat2outformat <string> will convert from the input format to the output one.
-					supported input/output formats: hex dec bin ascii
-					example: hex2ascii 0x41 → A 
-					(works even without the leading '0x')
-					
-					you can also type 'informat2all' that will convert to all 
-					out format supported for the given input.
-					example: hex2all 41 → Dec: 'Dec: 65 Bin: 1000001 ASCII:A'
-
-					depends on xxd, grep, sed, bc"
-#HEX
-hex2dec(){     
-	local HEX=$(echo $1 | sed 's/0x//g')
-    echo "obase=10;ibase=16;$HEX" | bc    
-}                  
-                   
-hex2ascii(){              
-	local HEX=$(echo $1 | sed 's/0x//g')
-	#This is to even the odds with a leading 0
-	echo $HEX | grep '^\(..\)*.$' > /dev/null && HEX="0$HEX" || HEX="$HEX"
-    printf $(echo $HEX | sed -r 's/(..)/\\x\1/g')    
-}                         
-                          
-hex2bin(){                
-	local HEX=$(echo $1 | sed 's/0x//g')
-    echo "obase=2;ibase=16;$HEX" | bc     
-}                                      
-                          
-hex2all(){                
-    echo Dec:         
-    hex2dec $1            
-    echo Bin:          
-    hex2bin $1                                          
-    echo ASCII:                                         
-    hex2ascii $1                                        
-} 
-#DEC
-dec2hex(){
-	printf '%x' "$1"
-}
-dec2bin(){
-	echo "obase=2;$1" | bc
-}
-dec2ascii(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-dec2all(){
-	echo Hex:
-	dec2hex $1
-	echo Bin:
-	dec2bin $1
-	echo ASCII:
-	dec2ascii $1
-}
-
-#BIN
-bin2hex(){
-	echo "obase=16;ibase=2;$1" | bc
-}
-bin2dec(){
-	echo "obase=10;ibase=2;$1" | bc
-}
-bin2ascii(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-bin2all(){
-	echo Hex:
-    bin2hex $1
+	ascii2bin $@
 	echo Dec:
-	bin2dec $1
-	echo ASCII:
-	bin2ascii $1
-}
-
-#ASCII
-ascii2hex(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-ascii2bin(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-ascii2dec(){
-	#TODO
-	echo NOT IMPLEMENTED YET
-}
-ascii2all(){
-	echo Hex:
-	ascii2hex $1
-	echo Bin:
-	ascii2bin $1
-	echo ASCII:
-	ascii2dec $1
+	ascii2dec $@
 }
 
 alias la="ls -la"

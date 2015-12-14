@@ -13,89 +13,118 @@ informat2outformat <string> will convert from the input format to the output one
 					depends on xxd, grep, sed, bc"
 #HEX
 hex2dec(){     
-	local HEX=$(echo $1 | sed 's/0x//g')
-    echo "obase=10;ibase=16;$HEX" | bc    
+	for var in `echo "$@"`
+	do
+		local HEX=$(echo $var | sed 's/0x//g')
+		echo "obase=10;ibase=16;$HEX" | bc    
+	done
 }                  
                    
 hex2ascii(){              
-	local HEX=$(echo $1 | sed 's/0x//g')
-	#This is to even the odds with a leading 0
-	echo $HEX | grep '^\(..\)*.$' > /dev/null && HEX="0$HEX" || HEX="$HEX"
-    printf $(echo $HEX | sed -r 's/(..)/\\x\1/g')    
+	for var in `echo "$@"`
+	do
+		local HEX=$(echo $var | sed 's/0x//g')
+		echo $HEX | grep '^\(..\)*.$' > /dev/null && HEX="0$HEX" || HEX="$HEX"
+		printf $(echo $HEX | sed -r 's/(..)/\\x\1/g')" " 
+	done
 }                         
-                          
+
 hex2bin(){                
-	local HEX=$(echo $1 | sed 's/0x//g')
-    echo "obase=2;ibase=16;$HEX" | bc     
+	for var in `echo "$@"`
+	do
+		local HEX=$(echo $var | sed 's/0x//g')
+		echo "obase=2;ibase=16;$HEX" | bc     
+	done
 }                                      
-                          
+
 hex2all(){                
-    echo Dec:         
-    hex2dec $1            
-    echo Bin:          
-    hex2bin $1                                          
-    echo ASCII:                                         
-    hex2ascii $1                                        
+	echo Dec:         
+	hex2dec $@            
+	echo Bin:          
+	hex2bin $@                                          
+	echo ASCII:                                         
+	hex2ascii $@                                        
 } 
 #DEC
 dec2hex(){
-	printf '%x' "$1"
+	for var in `echo "$@"`
+	do
+		printf '%x\n' "$var"
+	done
 }
 dec2bin(){
-	echo "obase=2;$1" | bc
+	for var in `echo "$@"`
+	do
+		echo "obase=2;$var" | bc
+	done
 }
 dec2ascii(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	for var in `echo "$@"`
+	do
+		hex2ascii $(dec2hex $var)
+	done
 }
 dec2all(){
 	echo Hex:
-	dec2hex $1
+	dec2hex $@
 	echo Bin:
-	dec2bin $1
+	dec2bin $@
 	echo ASCII:
-	dec2ascii $1
+	dec2ascii $@
 }
 
 #BIN
 bin2hex(){
-	echo "obase=16;ibase=2;$1" | bc
+	for var in `echo "$@"`
+	do
+		echo "obase=16;ibase=2;$var" | bc
+	done
 }
 bin2dec(){
-	echo "obase=10;ibase=2;$1" | bc
+	for var in `echo "$@"`
+	do
+		echo "obase=10;ibase=2;$var" | bc
+	done
 }
 bin2ascii(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	for var in `echo "$@"`
+	do
+		hex2ascii "$(bin2hex $var)"
+	done
 }
 bin2all(){
 	echo Hex:
-    bin2hex $1
+	bin2hex $@
 	echo Dec:
-	bin2dec $1
+	bin2dec $@
 	echo ASCII:
-	bin2ascii $1
+	bin2ascii $@
 }
 
 #ASCII
 ascii2hex(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	for var in "$@"
+	do
+		local length="${#var}"
+		for (( i = 0; i < length; i++ ))
+		do
+			local c="${var:$i:1}"
+			echo -n "$c" | xxd | cut -d" " -f 2
+		done
+	done
 }
 ascii2bin(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	hex2bin "$(ascii2hex $@)"
 }
 ascii2dec(){
-	#TODO
-	echo NOT IMPLEMENTED YET
+	hex2dec "$(ascii2hex $@)"
 }
 ascii2all(){
 	echo Hex:
-	ascii2hex $1
+	ascii2hex $@
 	echo Bin:
-	ascii2bin $1
-	echo ASCII:
-	ascii2dec $1
+	ascii2bin $@
+	echo Dec:
+	ascii2dec $@
 }
 
