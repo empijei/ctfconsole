@@ -1,18 +1,31 @@
+#FORMATS CONVERTER
+export CTFHELP=$CTFHELP"
+formats converter:
+informat2outformat <string> will convert from the input format to the output one.
+					supported input/output formats: hex dec bin ascii
+					example: hex2ascii 0x41 → A 
+					(works even without the leading '0x')
+					
+					you can also type 'informat2all' that will convert to all 
+					out format supported for the given input.
+					example: hex2all 41 → Dec: 'Dec: 65 Bin: 1000001 ASCII:A'
+
+					depends on xxd, grep, sed, bc"
 #HEX
 hex2dec(){     
-	HEX=$(echo $1 | sed 's/0x//g')
+	local HEX=$(echo $1 | sed 's/0x//g')
     echo "obase=10;ibase=16;$HEX" | bc    
 }                  
                    
 hex2ascii(){              
-	HEX=$(echo $1 | sed 's/0x//g')
+	local HEX=$(echo $1 | sed 's/0x//g')
 	#This is to even the odds with a leading 0
 	echo $HEX | grep '^\(..\)*.$' > /dev/null && HEX="0$HEX" || HEX="$HEX"
     printf $(echo $HEX | sed -r 's/(..)/\\x\1/g')    
 }                         
                           
 hex2bin(){                
-	HEX=$(echo $1 | sed 's/0x//g')
+	local HEX=$(echo $1 | sed 's/0x//g')
     echo "obase=2;ibase=16;$HEX" | bc     
 }                                      
                           
@@ -85,3 +98,4 @@ ascii2all(){
 	echo ASCII:
 	ascii2dec $1
 }
+

@@ -1,7 +1,9 @@
+#WEB ENCODER
+export CTFHELP=$CTFHELP"
+urlencode <string> will print the string encoded as url.
 
+					depends on xxd"
 urlencode() {
-    # urlencode <string>
-
     local length="${#1}"
     for (( i = 0; i < length; i++ )); do
         local c="${1:$i:1}"
@@ -13,9 +15,10 @@ urlencode() {
     done
 }
 
+export CTFHELP=$CTFHELP"
+urlencode <string> will decode a string encoded as url."
 urldecode() {
-    # urldecode <string>
-
     local url_encoded="${1//+/ }"
-    printf '%b' "${url_encoded//%/\\x}"
+    printf '%b' "${url_encoded//"%"/\\x}"
 }
+
