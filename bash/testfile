@@ -1,4 +1,8 @@
 source ../sourceme
+echo
+echo HEX
+echo
+
 hex2all '41
 42
 43'
@@ -7,18 +11,27 @@ hex2all '41 42 43'
 
 hex2all '414243'
 
+echo
+echo BIN
+echo
 bin2all '1100001
 1100010
 1100011'
 
 bin2all '1100001 1100010 1100011'
 
+echo
+echo DEC
+echo
 dec2all '65 66 67'
 
 dec2all '65
 66
 67'
 
+echo
+echo ASCII
+echo
 ascii2all abc
 
 ascii2all 'a b c'

@@ -16,7 +16,7 @@ hex2dec(){
 	for var in `echo "$@"`
 	do
 		local HEX=$(echo $var | sed 's/0x//g')
-		echo "obase=10;ibase=16;$HEX" | bc    
+		echo $(echo "obase=10;ibase=16;$HEX" | bc)" "
 	done
 }                  
                    
@@ -27,13 +27,14 @@ hex2ascii(){
 		echo $HEX | grep '^\(..\)*.$' > /dev/null && HEX="0$HEX" || HEX="$HEX"
 		printf $(echo $HEX | sed -r 's/(..)/\\x\1/g')" " 
 	done
+	echo
 }                         
 
 hex2bin(){                
 	for var in `echo "$@"`
 	do
 		local HEX=$(echo $var | sed 's/0x//g')
-		echo "obase=2;ibase=16;$HEX" | bc     
+		echo $(echo "obase=2;ibase=16;$HEX" | bc)" "
 	done
 }                                      
 

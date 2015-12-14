@@ -58,9 +58,9 @@ help(){
 }
 
 #TODO
-ctf(){
+#ctf(){
 
-}
+#}
 
 #TODO improve creating a folder in the root of a ctf
 challenge(){
