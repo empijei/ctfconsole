@@ -1,0 +1,47 @@
+errordecode <value> will print a human readable interpretation of a given dmesg
+					error.
+
+					example: errordecode 14 
+								Error:01110
+								No page found
+								Write access
+								User-mode access
+								Use of reserved bit detected
+
+
+					depends on xxd, bc, grep
+dmesg-readable 		will call dmesg, tail the last line and decode the error.
+					if pwntools are installed it will try to look up the IP 
+					with the 'cyclic -l' command.
+	
+ 					depends on xxd, grep, [pwntools]
+formats converter:
+informat2outformat <string> will convert from the input format to the output one.
+					supported input/output formats: hex dec bin ascii
+					example: hex2ascii 0x41 → A 
+					(works even without the leading '0x')
+					
+					you can also type 'informat2all' that will convert to all 
+					out format supported for the given input.
+					example: hex2all 41 → Dec: 'Dec: 65 Bin: 1000001 ASCII:A'
+
+					depends on xxd, grep, sed, bc
+analyze <file> 		will print useful informations about the given file and will
+					also create a fileinfo.log with the same informations.
+
+					commands called:
+						file
+						binwalk
+						trid
+						extract
+						on ELF files:
+							checksec
+							strings (this will only be written to the log)
+						on the other files:
+							strings
+
+					depends on the commands above
+urlencode <string> will print the string encoded as url.
+
+					depends on xxd
+urlencode <string> will decode a string encoded as url.
